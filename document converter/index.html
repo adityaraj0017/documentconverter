@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crazypdf Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-700 mb-4">Crazypdf Converter</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Convert your Word, PowerPoint, and Excel files to PDF quickly and easily</p>
+        </header>
+
+        <!-- Conversion Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Word to PDF -->
+            <div class="conversion-card bg-white rounded-xl shadow-md overflow-hidden p-6 text-center">
+                <div class="bg-indigo-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-file-word text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Word to PDF</h3>
+                <p class="text-gray-600 mb-4">Convert DOC, DOCX to PDF</p>
+                <button onclick="openFileInput('word')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Convert
+                </button>
+                <input type="file" id="word-input" class="hidden" accept=".doc,.docx" onchange="handleFileSelect(this, 'word')">
+            </div>
+
+            <!-- PPT to PDF -->
+            <div class="conversion-card bg-white rounded-xl shadow-md overflow-hidden p-6 text-center">
+                <div class="bg-indigo-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-file-powerpoint text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">PPT to PDF</h3>
+                <p class="text-gray-600 mb-4">Convert PPT, PPTX to PDF</p>
+                <button onclick="openFileInput('ppt')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Convert
+                </button>
+                <input type="file" id="ppt-input" class="hidden" accept=".ppt,.pptx" onchange="handleFileSelect(this, 'ppt')">
+            </div>
+
+            <!-- Excel to PDF -->
+            <div class="conversion-card bg-white rounded-xl shadow-md overflow-hidden p-6 text-center">
+                <div class="bg-indigo-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-file-excel text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Excel to PDF</h3>
+                <p class="text-gray-600 mb-4">Convert XLS, XLSX to PDF</p>
+                <button onclick="openFileInput('excel')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Convert
+                </button>
+                <input type="file" id="excel-input" class="hidden" accept=".xls,.xlsx" onchange="handleFileSelect(this, 'excel')">
+            </div>
+
+            <!-- PDF Compressor -->
+            <div class="conversion-card bg-white rounded-xl shadow-md overflow-hidden p-6 text-center">
+                <div class="bg-indigo-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-file-pdf text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">PDF Compressor</h3>
+                <p class="text-gray-600 mb-4">Reduce PDF file size</p>
+                <button onclick="openFileInput('pdf')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                    Compress
+                </button>
+                <input type="file" id="pdf-input" class="hidden" accept=".pdf" onchange="handleFileSelect(this, 'pdf')">
+            </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div id="dropzone" class="dropzone bg-white rounded-xl shadow-md p-8 mb-8 text-center cursor-pointer">
+            <div class="max-w-md mx-auto">
+                <i class="fas fa-cloud-upload-alt text-indigo-500 text-5xl mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Drag & Drop Files Here</h3>
+                <p class="text-gray-600 mb-4">Or click to browse your files</p>
+                <p class="text-sm text-gray-500">Supported formats: DOC, DOCX, PPT, PPTX, XLS, XLSX, PDF</p>
+            </div>
+            <input type="file" id="dropzone-input" class="hidden" accept=".doc,.docx,.ppt,.pptx,.xls,.xlsx,.pdf" onchange="handleDropzoneFile(this)">
+        </div>
+
+        <!-- Conversion Progress (Hidden by default) -->
+        <div id="conversion-progress" class="bg-white rounded-xl shadow-md p-6 mb-8 hidden">
+            <div class="flex items-center mb-4">
+                <div id="file-icon" class="mr-4">
+                    <i class="fas fa-file text-3xl"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between mb-1">
+                        <span id="filename" class="font-medium text-gray-800">File.pdf</span>
+                        <span id="progress-percent" class="text-gray-600">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="progress-bar bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section (Hidden by default) -->
+        <div id="result-section" class="bg-white rounded-xl shadow-md p-6 hidden">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-gray-800">Conversion Complete!</h3>
+                        <p id="result-filename" class="text-sm text-gray-600">YourFile.pdf</p>
+                    </div>
+                </div>
+                <div>
+                    <button id="download-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300 mr-3">
+                        <i class="fas fa-download mr-2"></i> Download
+                    </button>
+                    <button onclick="resetConverter()" class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 border border-gray-300 rounded-lg transition duration-300">
+                        <i class="fas fa-redo mr-2"></i> Convert Another
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mt-16">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Why Choose Our Converter?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-lock text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Secure Conversion</h3>
+                    <p class="text-gray-600">Your files are processed securely and never stored on our servers.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-bolt text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Fast Processing</h3>
+                    <p class="text-gray-600">Convert your documents to PDF in seconds with our optimized system.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Mobile Friendly</h3>
+                    <p class="text-gray-600">Convert files on the go with our responsive design that works on any device.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-100 py-8 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>© 2025 Crazypdf Converter. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Open file input when buttons are clicked
+        function openFileInput(type) {
+            document.getElementById(`${type}-input`).click();
+        }
+
+        // Handle file selection from buttons
+        function handleFileSelect(input, type) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                startConversion(file, type);
+            }
+        }
+
+        // Handle file selection from dropzone
+        function handleDropzoneFile(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileType = getFileType(file.name);
+                startConversion(file, fileType);
+            }
+        }
+
+        // Get file type from extension
+        function getFileType(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            if (['doc', 'docx'].includes(extension)) return 'word';
+            if (['ppt', 'pptx'].includes(extension)) return 'ppt';
+            if (['xls', 'xlsx'].includes(extension)) return 'excel';
+            if (['pdf'].includes(extension)) return 'pdf';
+            return 'unknown';
+        }
+
+        // Set up dropzone events
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropzone = document.getElementById('dropzone');
+            const dropzoneInput = document.getElementById('dropzone-input');
+
+            dropzone.addEventListener('click', function() {
+                dropzoneInput.click();
+            });
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropzone.classList.add('active');
+            }
+
+            function unhighlight() {
+                dropzone.classList.remove('active');
+            }
+
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const file = files[0];
+                    const fileType = getFileType(file.name);
+                    if (fileType !== 'unknown') {
+                        startConversion(file, fileType);
+                    } else {
+                        alert('Please upload a Word, PowerPoint, or Excel file.');
+                    }
+                }
+            }
+        });
+
+        // Start the conversion process (simulated)
+        function startConversion(file, type) {
+            // Show conversion progress
+            document.getElementById('conversion-progress').classList.remove('hidden');
+            document.getElementById('dropzone').classList.add('hidden');
+            
+            // Set file info
+            document.getElementById('filename').textContent = file.name;
+            
+            // Set appropriate icon
+            const iconMap = {
+                'word': 'file-word',
+                'ppt': 'file-powerpoint',
+                'excel': 'file-excel',
+                'pdf': 'file-pdf'
+            };
+            const fileIcon = document.getElementById('file-icon').querySelector('i');
+            fileIcon.className = `fas fa-${iconMap[type]} text-3xl text-indigo-600`;
+            
+            // Simulate conversion progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('progress-percent').textContent = `${Math.round(progress)}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(showResult, 500, file);
+                }
+            }, 300);
+        }
+
+        // Show result section
+        
+        // Show result section
+        function showResult(file) {
+            document.getElementById('conversion-progress').classList.add('hidden');
+            
+            const resultSection = document.getElementById('result-section');
+            resultSection.classList.remove('hidden');
+            
+            const resultFilename = file.name.replace(/\.[^/.]+$/, "") + '.pdf';
+            document.getElementById('result-filename').textContent = resultFilename;
+            
+            // Create a dummy PDF Blob (replace with actual converted file data if available)
+            const blob = new Blob(["This is a converted PDF content"], { type: "application/pdf" });
+            const url = URL.createObjectURL(blob);
+
+            // Enable download button to directly save file
+            document.getElementById('download-btn').onclick = function() {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = resultFilename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+        }
+
+        // Reset the converter
+        function resetConverter() {
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('dropzone').classList.remove('hidden');
+            
+            // Reset file inputs
+            document.getElementById('word-input').value = '';
+            document.getElementById('ppt-input').value = '';
+            document.getElementById('excel-input').value = '';
+            document.getElementById('dropzone-input').value = '';
+            
+            // Reset progress
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-percent').textContent = '0%';
+        }
+    </script>
+</body>
+</html>
